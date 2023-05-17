@@ -19,18 +19,28 @@ int main()
 	cout<<"Hello World!"<<endl;
 	integr s(0,1,Sigmoid);
 
-	ofstream fout("inte.dat");
-	for(int i=0; i<1e6; i+=1000){
-		fout<<setprecision (1)<<i<<"	"<<setprecision (64)<<s.rett(i)<<"	"<<s.trap(i)<<endl;
-		cout<<setprecision (1)<<i<<"	"<<setprecision (64)<<s.rett(i)<<"	"<<s.trap(i)<<endl;
-	}
-	fout.close();
+	ofstream fout;
 	fout.open("plt");
 	fout<<"set logscale"<<endl;
-	fout<<"plot 'inte.dat' u 1:2 w d, 'inte.dat' u 1:3 w d"<<endl;
+	fout<<"plot 'inte.dat' u 1:2 w p, 'inte.dat' u 1:3 w p, 'inte.dat' u 1:4 w p"<<endl;
 	fout.close();
 
+	fout.open("inte.dat");
+	double re,tr, mc;
+	for(long int i=1; i<1e10; i=i*10){
+		re=s.rett(i);
+		tr=s.trap(i);
+		mc=s.montecarlo(i);
+		fout<<setprecision (1)<<i<<"	"<<setprecision (64)<<re<<"	"<<tr<<"	"<<mc<<endl;
+		cout<<setprecision (1)<<i<<"	"<<setprecision (64)<<re<<"	"<<tr<<"	"<<mc<<endl;
+
+	//	if(i% int(1e6)==0)
+			system("gnuplot plt -p");
+	}
+	fout.close();
+	
 	system("gnuplot plt -p");
+	
 
 	return 0;
 }

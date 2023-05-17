@@ -19,6 +19,7 @@ public:
 	integr(double _a, double _b, double (*_foo)(double));
 	double rett(int n);
 	double trap(int n);
+	double montecarlo(int n, double ymax);
 	double montecarlo(int n);
 };
 
