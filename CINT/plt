@@ -1,0 +1,10 @@
+set terminal png medium size 1920,1080
+set output 'value.png'
+set logscale
+plot 'inte.dat' u 1:2 w p, 'inte.dat' u 1:3 w p, 'inte.dat' u 1:4 w p, 'inte.dat' u 1:5 w p
+set output 'diffq.png'
+set logscale
+plot 'inte.dat' u 1:6 w p, 'inte.dat' u 1:7 w p, 'inte.dat' u 1:8 w p
+set output 'time.png'
+set logscale
+plot 'inte.dat' u 1:9 w p, 'inte.dat' u 1:10 w p, 'inte.dat' u 1:11 w p
