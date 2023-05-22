@@ -1,4 +1,3 @@
-#include <iostream>
 #include "integr.h"
 
 using namespace std;
@@ -9,7 +8,7 @@ void randgen(mpf_t& out, mpf_t a, mpf_t b, gmp_randstate_t state, mp_bitcnt_t pr
 	mpf_init(temp2);
 
 	mpf_urandomb(temp1, state, prec);
-	mpf_div(temp2, b, a);
+	mpf_sub(temp2, b, a);
 	mpf_mul(temp1, temp1, temp2);
 	mpf_add(temp1, temp1, a);
 
@@ -208,7 +207,7 @@ void mp_integr::trap(mpf_t& out, mpz_t _n) {
 }
 void mp_integr::montecarlo(mpf_t& out, mpz_t _n) {
 	mpf_t S, l, n, i, temp1, temp2, ymax, A, f, x, y;
-	mpz_t _i, in;
+	mpz_t _i, in, ot;
 
 	mpf_init(S);
 	mpf_init(l);
@@ -224,6 +223,7 @@ void mp_integr::montecarlo(mpf_t& out, mpz_t _n) {
 
 	mpz_init(_i);
 	mpz_init(in);
+	mpz_init(ot);
 
 	mpf_set_z(n, _n);
 
@@ -233,7 +233,7 @@ void mp_integr::montecarlo(mpf_t& out, mpz_t _n) {
 	mpf_div(l, temp1, n);
 	mpf_add(temp1, a, l);
 
-	for (mpf_set(i, temp1); mpf_cmp(i, b) < 0; mpf_add(i, i, l))
+	for (mpf_set(i, temp1); mpf_cmp(i, b) <= 0; mpf_add(i, i, l))
 	{
 		foo(temp1, i);
 		mpf_abs(temp1, temp1);
@@ -251,9 +251,13 @@ start:
 	mpf_mul_ui(A, temp1, 2);
 
 	mpz_set_ui(in, 0);
+	cerr << endl << in << endl;
+	mpz_set_ui(ot, 0);
+	cerr << endl << ot << endl;
 
-	mpf_urandomb(temp1, rndst, prec);
-	mpf_mul_ui(temp2, ymax, 2);
+	ofstream fout("point.dat");
+	ofstream foutn("pointn.dat");
+	ofstream foutb("pointo.dat");
 
 	for (mpz_set_ui(_i, 0); mpz_cmp(_i, _n) < 0; mpz_add_ui(_i, _i, 1)) {
 		randgen(x, a, b, rndst, prec);
@@ -271,16 +275,55 @@ start:
 		if (mpf_cmp_si(temp2, 0) >= 0) {
 			mpf_abs(temp2, y);
 			if (mpf_cmp(temp1, temp2) >= 0) {
-				mpz_add_ui(in, in, 1);
+				if(mpf_cmp_si(y,0)>=0){
+					mpz_add_ui(in, in, 1);
+					//	cerr << endl << x << " " << y << " " << f << " " << in << endl;
+					fout << x << "	" << y << "	" << f << endl;
+				}
+				else{
+					mpz_sub_ui(in, in, 1);
+					//	cerr << endl << x << " " << y << " " << f << " " << in << endl;
+					foutn << x << "	" << y << "	" << f << endl;
+				}
+			}
+			else
+			{
+				mpz_add_ui(ot, ot, 1);
+				foutb << x << "	" << y << "	" << f << endl;
 			}
 		}
+		else
+		{
+			mpz_add_ui(ot, ot, 1);
+			foutb << x << "	" << y << "	" << f << endl;
+		}
+
+
 	}
+	fout.close();
+	foutb.close();
+	fout.open("grp");
+	fout << "set terminal png medium size 1920,1080" << endl;
+	fout << "set output 'graph.png'" << endl;
+	fout << "unset logscale" << endl;
+	fout << "plot 'point.dat' u 1:2 w p, 'pointn.dat' u 1:2 w p, 'pointo.dat' u 1:2 w p, 'pointo.dat' u 1:3 w p" << endl;
+	fout.close();
 
+	system("gnuplot grp -p");
+
+	cerr << "n	" << n << endl;
+	cerr << "_n	" << _n << endl;
+	cerr << "ot	" << ot << endl;
+	cerr << "in	" << in << endl;
 	mpf_set_z(temp1, in);
-	mpf_mul(temp1, temp1, A);
-	mpf_div(S, temp1, n);
-
+	cerr << "temp1	" << temp1 << endl;
+	cerr << "A	" << A << endl;
+	mpf_div(temp2, temp1, n);
+	cerr << "temp2	" << temp2 << endl;
+	mpf_mul(S, A, temp2);
+	cerr << "S	" << S << endl;
 	mpf_set(out, S);
+	cerr << "out	" << out << endl;
 
 	mpf_clear(S);
 	mpf_clear(l);

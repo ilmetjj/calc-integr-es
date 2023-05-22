@@ -7,6 +7,8 @@ class integr;
 #include <random>
 #include <chrono>
 #include <gmp.h>
+#include <iostream>
+#include <fstream>
 
 using namespace std;
 
